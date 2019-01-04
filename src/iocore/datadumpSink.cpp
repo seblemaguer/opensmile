@@ -1,18 +1,18 @@
 /*F***************************************************************************
- * 
- * openSMILE - the Munich open source Multimedia Interpretation by 
+ *
+ * openSMILE - the Munich open source Multimedia Interpretation by
  * Large-scale Extraction toolkit
- * 
+ *
  * This file is part of openSMILE.
- * 
+ *
  * openSMILE is copyright (c) by audEERING GmbH. All rights reserved.
- * 
+ *
  * See file "COPYING" for details on usage rights and licensing terms.
  * By using, copying, editing, compiling, modifying, reading, etc. this
  * file, you agree to the licensing terms in the file COPYING.
  * If you do not agree to the licensing terms,
  * you must immediately destroy all copies of this file.
- * 
+ *
  * THIS SOFTWARE COMES "AS IS", WITH NO WARRANTIES. THIS MEANS NO EXPRESS,
  * IMPLIED OR STATUTORY WARRANTY, INCLUDING WITHOUT LIMITATION, WARRANTIES OF
  * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ANY WARRANTY AGAINST
@@ -26,19 +26,19 @@
  * MAXIMUM EXTENT THE LAW PERMITS, NO MATTER WHAT LEGAL THEORY IT IS BASED ON.
  * ALSO, YOU MUST PASS THIS LIMITATION OF LIABILITY ON WHENEVER YOU DISTRIBUTE
  * THE SOFTWARE OR DERIVATIVE WORKS.
- * 
- * Main authors: Florian Eyben, Felix Weninger, 
+ *
+ * Main authors: Florian Eyben, Felix Weninger,
  * 	      Martin Woellmer, Bjoern Schuller
- * 
- * Copyright (c) 2008-2013, 
+ *
+ * Copyright (c) 2008-2013,
  *   Institute for Human-Machine Communication,
  *   Technische Universitaet Muenchen, Germany
- * 
- * Copyright (c) 2013-2015, 
+ *
+ * Copyright (c) 2013-2015,
  *   audEERING UG (haftungsbeschraenkt),
  *   Gilching, Germany
- * 
- * Copyright (c) 2016,	 
+ *
+ * Copyright (c) 2016,
  *   audEERING GmbH,
  *   Gilching Germany
  ***************************************************************************E*/
@@ -82,6 +82,7 @@ SMILECOMPONENT_REGCOMP(cDatadumpSink)
   SMILECOMPONENT_IFNOTREGAGAIN(
     ct->setField("filename","The filename of the output file (if it doesn't exist it will be created).","datadump.dat");
     ct->setField("lag","output data <lag> frames behind",0,0,0);
+    ct->setField("disable_header", "1 = remove the vecsize info => raw data (up to the user to know the size); 0 = default behaviour", 0);
     ct->setField("append","1 = append to an existing file, or create a new file; 0 = overwrite an existing file, or create a new file",0);
   )
 
@@ -104,7 +105,7 @@ cDatadumpSink::cDatadumpSink(const char *_name) :
 void cDatadumpSink::fetchConfig()
 {
   cDataSink::fetchConfig();
-  
+
   filename = getStr("filename");
   SMILE_IDBG(3,"filename = '%s'",filename);
 
@@ -113,6 +114,9 @@ void cDatadumpSink::fetchConfig()
 
   append = getInt("append");
   if (append) { SMILE_IDBG(3,"append to file is enabled"); }
+
+  disable_header = getInt("disable_header");
+  if (disable_header) { SMILE_IDBG(3, "dumping size header to file is disabled"); }
 }
 
 /*
@@ -130,10 +134,10 @@ int cDatadumpSink::myFinaliseInstance()
 {
   int ap=0;
   float tmp=0;
-  
+
   int ret = cDataSink::myFinaliseInstance();
   if (ret==0) return 0;
-  
+
   if (append) {
     // check if file exists:
     filehandle = fopen(filename, "rb");
@@ -156,14 +160,14 @@ int cDatadumpSink::myFinaliseInstance()
   if (filehandle == NULL) {
     COMP_ERR("Error opening binary file '%s' for writing (component instance '%s', type '%s')",filename, getInstName(), getTypeName());
   }
-  
+
   if (vecSize == 0) vecSize = reader_->getLevelN();
 
-  if (!ap) {
+  if ((!ap) && (!disable_header)) {
     // write mini dummy header ....
     writeHeader();
   }
-  
+
   return ret;
 }
 
@@ -171,7 +175,7 @@ int cDatadumpSink::myFinaliseInstance()
 int cDatadumpSink::myTick(long long t)
 {
   if (filehandle == NULL) return 0;
-  
+
   SMILE_DBG(4,"tick # %i, writing value vector (lag=%i):",t,lag);
   cVector *vec= reader_->getFrameRel(lag);  //new cVector(nValues+1);
   if (vec == NULL) return 0;
@@ -179,7 +183,7 @@ int cDatadumpSink::myTick(long long t)
   // now print the vector:
   int i; float *tmp = (float*)malloc(sizeof(float)*vec->N);
   if (tmp==NULL) OUT_OF_MEMORY;
-  
+
   if (vec->type == DMEM_FLOAT) {
     for (i=0; i<vec->N; i++) {
       tmp[i] = (float)(vec->dataF[i]);
@@ -223,9 +227,8 @@ void cDatadumpSink::writeHeader()
 
 cDatadumpSink::~cDatadumpSink()
 {
-  // write final header 
-  writeHeader();
+  // write final header
+  if (!disable_header) {  writeHeader(); }
   // close output file
   fclose(filehandle);
 }
-
