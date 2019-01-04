@@ -125,26 +125,24 @@ SMILELIB_SOURCES=\
 	src/smileutil/smileUtilSpline.c \
 	src/smileutil/zerosolve.cpp \
 	src/video/openCVSource.cpp
-	
+
 
 
   SMILE_SOURCES=$(SMILELIB_SOURCES)
 
   SMILE_CPPFLAGS = -Isrc/include -Iprogsrc/include $(SEMAINEAPI_CPPFLAGS) $(PORTAUDIO_CPPFLAGS) $(OPENCV_CPPFLAGS) -ggdb $(PTHREAD_CFLAGS)
   SMILE_LIBS =  $(PORTAUDIO_LDFLAGS) $(OPENCV_LDFLAGS) -lm $(SEMAINEAPI_LDFLAGS) $(PTHREAD_LIBS) $(DLIB)
-   
-  SMILExtract_SOURCES = progsrc/smilextract/SMILExtract.cpp 
+
+  SMILExtract_SOURCES = progsrc/smilextract/SMILExtract.cpp
   SMILExtract_CPPFLAGS = $(SMILE_CPPFLAGS)
-  SMILExtract_LDADD = $(SMILE_LIBS) -lopensmile
+  SMILExtract_LDADD = $(SMILE_LIBS) libopensmile.la
 
   lib_LTLIBRARIES = libopensmile.la
   libopensmile_la_SOURCES = $(SMILE_SOURCES)
   libopensmile_la_CPPFLAGS = $(SMILE_CPPFLAGS)
   libopensmile_la_LIBADD = $(SMILE_LIBS)
   libopensmile_la_LDFLAGS = --no-undefined
-  
 
 
-# endif 
 
-
+# endif
