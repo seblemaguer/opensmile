@@ -1,0 +1,30 @@
+# Joker generated files
+*.in
+*.la
+*.lo
+*.m4
+*.o
+
+# Generated directory
+.deps/
+.dirstamp
+.libs/
+autom4te.cache/
+
+# Generated files
+Makefile
+SMILExtract
+compile
+config.guess
+config.h
+config.log
+config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+smile.log
+stamp-h1
