@@ -10,11 +10,19 @@
 
 # EXPERIMENTAL AND UNSUPPORTED!!!!   Update to latest build code in buildWithPortaudio.sh to make it work!
 
+
+INSTPREFIX=""
+
+while getopts "o:p:" options; do
+	case $options in
+	p ) INSTPREFIX="$OPTARG";;
+	\?) echo "Usage: $0 [-p <inst_prefix>]";;
+	esac
+done
+
 Pwd=`pwd`;
-if [ "$1" != "" ]; then
-  INSTPREFIX=$1;  
-else
-  INSTPREFIX="$Pwd/inst";
+if [ "$INSTPREFIX" = "" ]; then
+  INSTPREFIX="$Pwd/inst"
 fi
 
 
@@ -33,7 +41,7 @@ export CFLAGS="-O2 -mfpmath=sse -march=native"
 #export CXXFLAGS="-O2 -mfpmath=sse -mtune=athlon64"
 #export CFLAGS="-O2 -mfpmath=sse -mtune=athlon64"
 #./configure --prefix=$Pwd/inst --enable-static --disable-shared &&
-./configure --prefix=$INSTPREFIX --with-portaudio="yes" 
+./configure --prefix=$INSTPREFIX --with-portaudio="yes"
 if [ $? != 0 ]; then
   echo "failed to configure openSMILE!";
   exit -1;
@@ -41,7 +49,7 @@ fi
 
 
 make clean &&
-make -j8 ; make install 
+make -j8 ; make install
 if [ $? != 0 ]; then
   echo "failed to build or install openSMILE!";
   exit -1;
@@ -59,7 +67,7 @@ rm tmp
 
 if [ "$TMP" = "" ]; then
   echo "ERROR: PortAudio was not found on your system, please check if you have the development headers installed! If unsure, use the script buildWithPortAudio.sh! openSMILE was built, however without portaudio support!";
-else 
+else
 
 echo ""
 echo "build successfull."
