@@ -135,7 +135,7 @@ SMILELIB_SOURCES=\
 
   SMILExtract_SOURCES = progsrc/smilextract/SMILExtract.cpp
   SMILExtract_CPPFLAGS = $(SMILE_CPPFLAGS)
-  SMILExtract_LDADD = $(SMILE_LIBS) libopensmile.la
+  SMILExtract_LDADD = $(SMILE_LIBS) libopensmile.la -lpthread
 
   lib_LTLIBRARIES = libopensmile.la
   libopensmile_la_SOURCES = $(SMILE_SOURCES)
